@@ -9,55 +9,53 @@ app.use(cors());
 const PORT = 3002;
 
 let usuarios = [
-    { id: 1, nome: "claudinei" },
-    { id: 2, nome: "rodisnei" }
+  { id: 1, nome: "claudinei" },
+  { id: 2, nome: "rodisnei" }
 ]
 
 app.post('/alunos', (req, res) => {
-    const { nome } = req.body;
-    const sql = "INSERT INTO ALUNOS (nome) values (?)"
-    db.query(sql, [nome], function (err, result) {
-        if (err) {
-            return response.status(500).json({ err: err.message })
-        }
-        res.status(200).json({
-            id:result.insertId,
-            nome
-        })
+  const { nome, email, nota1, nota2 } = req.body;
+  if (!nome || !email || nota1 == null || nota2 == null) {
+    return res.status(400).json({ err: "Campos obrigatórios não preenchidos" })
+  }
+
+  if(isNaN(nota1) || isNaN(nota2)){
+    return res.status(400).json({ err: "As notas devem ser números" })
+  }
+
+  const notaFinal = (parseFloat(nota1)) + (parseFloat(nota2));
+  const status = notaFinal >= 6 ? "Aprovado" : "Reprovado";
+  const sql = "INSERT INTO alunos (nome, email, nota1, nota2, notaFinal, status) values (?, ?, ?, ?, ?, ?)"
+
+  db.query(sql, [nome, email, nota1, nota2, notaFinal, status], (err, result) => {
+    if (err) {
+      return res.status(500).json({ err: err.message })
+    }
+    res.status(200).json({
+      id:result.insertId,
+      nome,
+      notaFinal,
+      status
     })
-
+  })
 })
-
 
 // app.get('/usuarios',(request, response)=>{
-//     let id = request.body.id
-//     let nome = request.body.nome;
-//     response.status(202).json({"dados":usuarios})
+//  let id = request.body.id
+//  let nome = request.body.nome;
+//  response.status(202).json({"dados":usuarios})
 // })
 
-app.get('/alunos', function (req,) {
-    db.query("SELECT * FROM escola.alunos", (err, result) => {
-        if (err) {
-            return response.status(erro).json({ err: err.message })
-        }
-        res.json(result)
-    })
-})
-
-app.post('/usuarios', (req, res) => {
-    const nome = req.body.nome;
-
-    const novouser = {
-        id: usuarios.length + 1,
-        nome: nome
+app.get('/alunos', (req, res) => {
+  db.query("SELECT * FROM alunos", (err, result) => {
+    if (err) {
+      return res.status(500).json({ erro: err.message });
     }
+    res.json(result);
+  });
+});
 
-    usuarios.push(novouser)
-    console.log(nome)
-    console.log(usuarios)
-    res.json({ 'nome enviado ': nome, 'users': usuarios })
-})
 
 app.listen(PORT, function (params) {
-    console.log(`Server funando na porta ${PORT}`)
+  console.log(`Server funando na porta ${PORT}`)
 })
