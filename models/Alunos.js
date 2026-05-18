@@ -5,6 +5,10 @@ const Aluno = sequelize.define('Aluno', {
     nome:{
         type: DataTypes.STRING,
         allowNull:false
+    },
+    email:{
+        type: DataTypes.STRING,
+        allowNull:false
     }
 },
 {

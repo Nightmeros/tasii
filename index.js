@@ -26,8 +26,9 @@ app.get('/alunos', async (req, res) => {
 
 app.post('/alunos', async (req, res) => {
     const nome = req.body.nome;
+    const email = req.body.email;
     try {
-        const aluno = await Aluno.create({ nome })
+        const aluno = await Aluno.create({ nome, email })
         res.status(201).json(aluno)
     } catch (err) {
         console.error(err)
@@ -47,6 +48,32 @@ app.get('/alunos/:id', async (req, res) => {
             return res.status(404).json({ erro: "Aluno não encontrado" })
         }
         res.status(500).json(aluno)
+
+    } catch (err) {
+        console.error(err)
+        res.status(500).json(
+            {
+                mensagem: "Erro no servidor"
+            }
+        )
+    }
+})
+app.put('/alunos/:id', async (req, res) => {
+    const id = req.params.id;
+    const nome = req.body.nome;
+
+    try {
+        const aluno = await Aluno.findByPk(id);
+        if (!aluno) {
+            return res.status(404).json({ erro: "Aluno não encontrado" })
+        }
+
+
+        aluno.nome = nome;
+
+        await aluno.save();
+        res.status(200).json({ mensagem: "aluno atualizado" })
+
     } catch (err) {
         console.error(err)
         res.status(500).json(
@@ -57,6 +84,23 @@ app.get('/alunos/:id', async (req, res) => {
     }
 })
 
+
+app.delete('alunos/:id', async (req, res) => {
+    const id = req.params.id;
+    try {
+        const aluno = await Aluno.findByPk(id);
+        if (!aluno) {
+            return res.status(404).json({ erro: "Aluno não encontrado" })
+        }
+
+        await aluno.destroy
+        res.json({
+            mensagem: "aluno removido"
+        })
+    } catch (err) {
+
+    }
+})
 
 
 
